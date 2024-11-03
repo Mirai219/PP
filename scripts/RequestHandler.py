@@ -1,30 +1,30 @@
-import time
 import json
 
 class RequestHandler:
-    def __init__(self, server ,clients):
-        self.server = server
-        self.clients = clients
-        self.handlers = {}
+    def __init__(self):
+        self.self.handlers = {}
         self.register_command("message", self.handle_message)
 
     def register_command(self, type:str, handler):
         self.handlers[type] = handler
 
-    async def handle_request(self, **kwargs):
-        type = kwargs.get("type")
-        return await self.handlers[type](**kwargs)
+    def handle_requst(self, protocol:str):
+        protocol = json.loads(protocol)
+        version = protocol.get("version")
+        event = protocol.get("event")
+        data = protocol.get("data")
+        '''
+        data is a dictionary like this:
+            user_id: "3800d555-50d3-5596-8bcc-d614a9a36601",
+            room_id: "054692d1-0c09-59d2-89b1-254d9878f0e2",
+            msg_id: "630eb68f-e0fa-5ecc-887a-7c7a62614681",
+            msg_type: "text",
+            content: {
+                text: "test text"
+            }
+        '''
+        if version == "1.0":
+            return self.handlers[event](data)
         
-    async def handle_message(self, **kwargs):
-        content = kwargs.get("content")
-        nickname = kwargs.get("nickname")
-        timestamp = int(time.time() * 1000)
-        response = {
-            "type": "message",
-            "content": content,
-            "nickname": nickname,
-            "timestamp": timestamp
-        }
-        for client in self.clients:
-            await client.send(json.dumps(response))
-        return response        
+    async def handle_message(self, data):
+        pass

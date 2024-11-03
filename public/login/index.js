@@ -1,10 +1,11 @@
 // ui
 const output = document.querySelector('#output')
+const githubLoginLink = document.querySelector('#github-login-link');
 
 // apis
-const GITHUB_CLIENT_ID = 'Ov23liREWXLYXQ5dyjAL'
+const GITHUB_CLIENT_ID = ''
 const GITHUB_AUTHORIZE_URI = 'https://github.com/login/oauth/authorize'
-const GITHUB_REDIRECT_URI = 'http://localhost:9000/login'
+const GITHUB_REDIRECT_URI = 'http://116.62.152.206:9004'
 
 const LOGIN_API = 'http://localhost:8100/api/v1/login/github'
 
@@ -18,6 +19,7 @@ class StateUtil {
     const state = Math.random().toString(36).slice(2)
     const expireTime = Date.now() + StateUtil.ONE_MINUTE * 10
     this.#set(state, expireTime)
+    return state;
   }
 
   static verify(state) {
@@ -58,6 +60,30 @@ class StateUtil {
   static #remove() {
     sessionStorage.removeItem(this.#storageKey)
   }
+}
+
+// Function to redirect to GitHub authorize URL
+function redirectToGitHubAuthorize() {
+  const state = StateUtil.create();
+  console.log('Generated state:', state); // 添加日志记录
+  const authorizeUrl = `${GITHUB_AUTHORIZE_URI}?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&state=${state}`;
+  console.log('Authorize URL:', authorizeUrl); // 添加日志记录
+  window.location.href = authorizeUrl;
+}
+
+// Add event listener to the login link
+githubLoginLink.addEventListener('click', (event) => {
+  event.preventDefault();
+  redirectToGitHubAuthorize();
+});
+
+// Function to get query parameters from URL
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    code: params.get('code'),
+    state: params.get('state'),
+  };
 }
 
 function createErrorNameElement(errorName) {
@@ -158,6 +184,28 @@ function resolveLogin(code, state) {
     })
 }
 
+// Function to send POST request to LOGIN_API with the code
+async function sendCodeToLoginAPI(code) {
+  try {
+    const response = await fetch(LOGIN_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    console.log('Login successful:', data);
+  } catch (error) {
+    console.error('Error during login:', error);
+  }
+}
+
 const searchParams = new URLSearchParams(location.search)
 
 const error = searchParams.get('error')
@@ -172,7 +220,4 @@ if (error) {
 } else if (code) {
   // Login
   resolveLogin(code, state)
-} else {
-  // Redirect to Github OAuth
-  resolveOAuth()
 }

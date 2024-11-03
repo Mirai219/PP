@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth QQ Login</title>
+</head>
+<body>
+    <h1>QQ OAuth Authorization</h1>
+    <a id="oauthLink" href="#">Login with QQ</a>
+
+    <script>
+        function generateRandomState(length) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let state = '';
+            for (let i = 0; i < length; i++) {
+                state += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return state;
+        }
+
+        document.getElementById('oauthLink').addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const response_type = "code";
+            const client_id = "*********";
+            const redirect_uri = encodeURIComponent("localhost:3000");
+            const state = generateRandomState(16);
+
+            const authUrl = `https://graph.qq.com/oauth2.0/authorize?response_type=${response_type}&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`;
+
+            window.location.href = authUrl;
+        });
+    </script>
+</body>
+</html>

@@ -2,11 +2,11 @@ import http.server
 import socketserver
 import os
 
-directory_to_serve = "D:\PP_project\public\login"
+directory_to_serve = "//root/PP/public/login"
 
 os.chdir(directory_to_serve)
 
-PORT = 9000
+PORT = 9004
 
 Handler = http.server.SimpleHTTPRequestHandler
 

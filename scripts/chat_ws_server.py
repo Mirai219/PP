@@ -4,8 +4,10 @@ from config import PORT
 from Parser import Parser
 from RequestHandler import RequestHandler
 from Logger import Logger
+import os
 
-logger = Logger("./log/chat_server.log")
+log_path = os.path.join(os.getcwd(), 'log/chat_ws_server.log')
+logger = Logger(log_path)
 
 class ChatServer:
     def __init__(self):
